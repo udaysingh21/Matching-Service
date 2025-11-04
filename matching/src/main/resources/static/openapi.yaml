@@ -1,0 +1,96 @@
+openapi: 3.0.1
+info:
+  title: Matching Service API
+  version: 1.0.0
+  description: API for recommending NGO postings to volunteers and locking match slots
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /api/matching/recommend:
+    post:
+      summary: Recommend NGO postings for a volunteer
+      description: Returns postings matching volunteer location & availability
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VolunteerRequest'
+      responses:
+        '200':
+          description: List of recommended postings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostingResponse'
+
+  /api/matching/lock/{volunteerId}/{postingId}:
+    post:
+      summary: Lock posting for volunteer (temporary slot reservation)
+      parameters:
+        - in: path
+          name: volunteerId
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: postingId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Match confirmation message
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  schemas:
+    VolunteerRequest:
+      type: object
+      properties:
+        volunteerId:
+          type: integer
+        location:
+          type: string
+        availableFrom:
+          type: string
+          format: date
+        availableTo:
+          type: string
+          format: date
+      required:
+        - volunteerId
+        - location
+        - availableFrom
+        - availableTo
+
+    PostingResponse:
+      type: object
+      properties:
+        postingId:
+          type: integer
+        ngoName:
+          type: string
+        location:
+          type: string
+        date:
+          type: string
+          format: date
+        slotsAvailable:
+          type: integer
+        recommended:
+          type: boolean
+      required:
+        - postingId
+        - ngoName
+        - location
+        - date
+        - slotsAvailable
+        - recommended
