@@ -1,3 +1,2 @@
 # Matching-Service
-Devika working on it
-first commit
+Devika working on Matching service
