@@ -2,31 +2,73 @@ package com.ngo.matching.service;
 
 import com.ngo.matching.model.PostingResponse;
 import com.ngo.matching.model.VolunteerRequest;
+import com.ngo.matching.repository.PostingRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
 
 @Service
 public class MatchingService {
 
-    private final List<PostingResponse> postings = List.of(
-            new PostingResponse(1L, "NGO A", "Mumbai", LocalDate.of(2025, 1, 20), 3, false),
-            new PostingResponse(2L, "NGO B", "Pune", LocalDate.of(2025, 1, 22), 1, false),
-            new PostingResponse(3L, "NGO C", "Mumbai", LocalDate.of(2025, 1, 25), 0, false)
-    );
+    private final PostingRepository repo;
 
+    public MatchingService(PostingRepository repo) {
+        this.repo = repo;
+    }
+
+    // ---------------- ADD POSTING --------------------
+    public PostingResponse addPosting(PostingResponse posting) {
+        return repo.save(posting);
+    }
+
+    // ---------------- RECOMMEND POSTINGS -------------
     public List<PostingResponse> recommendPostings(VolunteerRequest req) {
-        return postings.stream()
-                .filter(p -> p.getLocation().equalsIgnoreCase(req.getLocation()))
-                .filter(p -> !p.getDate().isBefore(req.getAvailableFrom()) && !p.getDate().isAfter(req.getAvailableTo()))
-                .filter(p -> p.getSlotsAvailable() > 0)
-                .map(p -> new PostingResponse(p.getPostingId(), p.getNgoName(), p.getLocation(), p.getDate(), p.getSlotsAvailable(), true))
-                .collect(Collectors.toList());
+
+        String location = (req.getLocation() != null && !req.getLocation().isEmpty())
+                ? req.getLocation()
+                : null;
+
+        LocalDate date = req.getDate(); // null means no date filter
+
+        if (location != null && date != null) {
+            return repo.findByLocationIgnoreCaseAndDateAndSlotsAvailableGreaterThan(
+                    location, date, 0
+            );
+        }
+
+        if (location != null) {
+            return repo.findByLocationIgnoreCaseAndSlotsAvailableGreaterThan(
+                    location, 0
+            );
+        }
+
+        if (date != null) {
+            return repo.findByDateAndSlotsAvailableGreaterThan(
+                    date, 0
+            );
+        }
+
+        return repo.findBySlotsAvailableGreaterThan(0);
     }
 
+
+    // ---------------- LOCK POSTING -------------------
     public String lockPosting(Long volunteerId, Long postingId) {
-        return "Volunteer " + volunteerId + " temporarily matched to Posting " + postingId + " (mock)";
+
+        PostingResponse posting = repo.findById(postingId)
+                .orElseThrow(() -> new RuntimeException("Posting not found"));
+
+        if (posting.getSlotsAvailable() <= 0) {
+            throw new RuntimeException("No slots available");
+        }
+
+        // reduce slot
+        posting.setSlotsAvailable(posting.getSlotsAvailable() - 1);
+        repo.save(posting);
+
+        return "Volunteer " + volunteerId + " successfully locked posting " + postingId;
     }
+
 }
