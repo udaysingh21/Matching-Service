@@ -3,33 +3,42 @@ package com.ngo.matching.controller;
 import com.ngo.matching.model.PostingResponse;
 import com.ngo.matching.model.VolunteerRequest;
 import com.ngo.matching.service.MatchingService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
-@Tag(name = "Matching API", description = "Recommend NGO postings & lock assignments")
 @RestController
 @RequestMapping("/api/matching")
+@Tag(name = "Matching API")
 public class MatchingController {
 
     @Autowired
-    private MatchingService matchingService;
+    private MatchingService service;
 
-    @Operation(summary = "Recommend NGO postings for a volunteer")
-    @PostMapping("/recommend")
-    public List<PostingResponse> recommendPostings(@RequestBody VolunteerRequest request) {
-        return matchingService.recommendPostings(request);
+    @Operation(summary = "Add a new posting")
+    @PostMapping("/add")
+    public ResponseEntity<PostingResponse> add(@RequestBody PostingResponse posting) {
+        return ResponseEntity.ok(service.addPosting(posting));
     }
 
-    @Operation(summary = "Lock posting for volunteer (reserve slot)")
+    @Operation(summary = "Recommend postings")
+    @PostMapping("/recommend")
+    public ResponseEntity<List<PostingResponse>> recommend(@RequestBody VolunteerRequest req) {
+        return ResponseEntity.ok(service.recommendPostings(req));
+    }
+
+    @Operation(summary = "Lock posting for a volunteer")
     @PostMapping("/lock/{volunteerId}/{postingId}")
-    public String lockPosting(
+    public ResponseEntity<String> lock(
             @PathVariable Long volunteerId,
             @PathVariable Long postingId) {
 
-        return matchingService.lockPosting(volunteerId, postingId);
+        return ResponseEntity.ok(service.lockPosting(volunteerId, postingId));
     }
 }
