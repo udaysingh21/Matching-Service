@@ -1,16 +1,17 @@
 package com.ngo.matching.controller;
 
 import com.ngo.matching.model.PostingResponse;
-import com.ngo.matching.model.VolunteerRequest;
 import com.ngo.matching.service.MatchingService;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -27,11 +28,35 @@ public class MatchingController {
         return ResponseEntity.ok(service.addPosting(posting));
     }
 
-    @Operation(summary = "Recommend postings")
-    @PostMapping("/recommend")
-    public ResponseEntity<List<PostingResponse>> recommend(@RequestBody VolunteerRequest req) {
-        return ResponseEntity.ok(service.recommendPostings(req));
+    @Operation(summary = "Recommend postings with optional filters")
+    @GetMapping("/recommend")
+    public ResponseEntity<?> recommend(
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String domain,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate date
+    ) {
+        // Check if all inputs are null/empty
+        if ((location == null || location.isBlank()) &&
+                (domain == null || domain.isBlank()) &&
+                date == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("At least one filter (location/domain/date) is required.");
+        }
+
+        List<PostingResponse> postings = service.recommendPostings(location, domain, date);
+
+        if (postings == null || postings.isEmpty()) {
+            return ResponseEntity.status(404).body("No postings found for given filters.");
+        }
+
+        return ResponseEntity.ok(postings);
     }
+
+
+
 
     @Operation(summary = "Lock posting for a volunteer")
     @PostMapping("/lock/{volunteerId}/{postingId}")

@@ -15,20 +15,16 @@ public class PostingResponse {
     private String location;
     private LocalDate date;
     private int slotsAvailable;
-    private boolean recommended;
+    private String domain;
 
-    public PostingResponse() {
-        // default constructor
-    }
+    public PostingResponse() {}
 
-    public PostingResponse(Long postingId, String ngoName, String location, LocalDate date,
-                           int slotsAvailable, boolean recommended) {
-        this.postingId = postingId;
+    public PostingResponse(String ngoName, String location, LocalDate date, int slotsAvailable, String domain) {
         this.ngoName = ngoName;
         this.location = location;
         this.date = date;
         this.slotsAvailable = slotsAvailable;
-        this.recommended = recommended;
+        this.domain = domain;
     }
 
     public Long getPostingId() {
@@ -71,11 +67,11 @@ public class PostingResponse {
         this.slotsAvailable = slotsAvailable;
     }
 
-    public boolean isRecommended() {
-        return recommended;
+    public String getDomain() {
+        return domain;
     }
 
-    public void setRecommended(boolean recommended) {
-        this.recommended = recommended;
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 }
