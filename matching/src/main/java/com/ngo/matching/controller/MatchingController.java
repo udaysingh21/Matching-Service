@@ -30,7 +30,7 @@ public class MatchingController {
 
     @Operation(summary = "Recommend postings with optional filters")
     @GetMapping("/recommend")
-    public ResponseEntity<List<PostingResponse>> recommend(
+    public ResponseEntity<?> recommend(
             @RequestParam(required = false) String location,
             @RequestParam(required = false) String domain,
             @RequestParam(required = false)
@@ -43,17 +43,18 @@ public class MatchingController {
                 date == null) {
             return ResponseEntity
                     .badRequest()
-                    .body(null); // or throw a custom exception
+                    .body("At least one filter (location/domain/date) is required.");
         }
 
         List<PostingResponse> postings = service.recommendPostings(location, domain, date);
 
         if (postings == null || postings.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 204 No Content if no postings found
+            return ResponseEntity.status(404).body("No postings found for given filters.");
         }
 
         return ResponseEntity.ok(postings);
     }
+
 
 
 
