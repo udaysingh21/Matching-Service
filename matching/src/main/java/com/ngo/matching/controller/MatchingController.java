@@ -2,6 +2,7 @@ package com.ngo.matching.controller;
 
 import com.ngo.matching.model.PostingResponse;
 import com.ngo.matching.service.MatchingService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -27,31 +28,37 @@ public class MatchingController {
         return ResponseEntity.ok(service.addPosting(posting));
     }
 
-    @Operation(summary = "Recommend postings")
+    @Operation(summary = "Recommend postings with optional filters")
     @GetMapping("/recommend")
     public ResponseEntity<?> recommend(
-            @RequestParam(required = false) String pincode,
+            @RequestParam(required = false) String location,
             @RequestParam(required = false) String domain,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate date
     ) {
-        if ((pincode == null || pincode.isBlank()) &&
+        // Check if all inputs are null/empty
+        if ((location == null || location.isBlank()) &&
                 (domain == null || domain.isBlank()) &&
                 date == null) {
-            return ResponseEntity.badRequest().body("At least one filter is required.");
+            return ResponseEntity
+                    .badRequest()
+                    .body("At least one filter (location/domain/date) is required.");
         }
 
-        List<PostingResponse> postings = service.recommendPostings(pincode, domain, date);
+        List<PostingResponse> postings = service.recommendPostings(location, domain, date);
 
         if (postings == null || postings.isEmpty()) {
-            return ResponseEntity.status(404).body("No postings found.");
+            return ResponseEntity.status(404).body("No postings found for given filters.");
         }
 
         return ResponseEntity.ok(postings);
     }
 
 
+
+
+    @Operation(summary = "Lock posting for a volunteer")
     @PostMapping("/lock/{volunteerId}/{postingId}")
     public ResponseEntity<String> lock(
             @PathVariable Long volunteerId,

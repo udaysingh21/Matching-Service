@@ -133,9 +133,10 @@ public class MatchingService {
         // --------------------------------------------
         // OPTIONAL: UPDATE LOCAL MATCHING MS STORAGE(must be done by posting -ms)
         // --------------------------------------------
-//        posting.setVolunteersNeeded(posting.getVolunteersNeeded() - 1);
-//        repo.save(posting);
+        posting.setVolunteersNeeded(posting.getVolunteersNeeded() - 1);
+        repo.save(posting);
 
         return "Volunteer " + volunteerId + " successfully registered for posting " + postingId;
     }
+
 }

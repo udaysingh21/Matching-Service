@@ -12,16 +12,21 @@ public class PostingResponse {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // comment later since id comes from posting service
     private Long id;
 
-    private String title;
-    private String description;
+    private String ngoName;
+    private String location;
+    private LocalDate date;
+    private int slotsAvailable;
     private String domain;
 
-    private String pincode;     // NEW
-    private String city;
-    private String state;
-    private String country;
+    public PostingResponse() {}
 
-    private Integer volunteersNeeded;  // replaces slotsAvailable
+    public PostingResponse(String ngoName, String location, LocalDate date, int slotsAvailable, String domain) {
+        this.ngoName = ngoName;
+        this.location = location;
+        this.date = date;
+        this.slotsAvailable = slotsAvailable;
+        this.domain = domain;
+    }
 
     private LocalDate startDate;
     private LocalDate endDate;
@@ -32,6 +37,39 @@ public class PostingResponse {
 
     private String status;
 
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
+    public void setNgoName(String ngoName) {
+        this.ngoName = ngoName;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public int getSlotsAvailable() {
+        return slotsAvailable;
+    }
+
+    public void setSlotsAvailable(int slotsAvailable) {
+        this.slotsAvailable = slotsAvailable;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
 }
