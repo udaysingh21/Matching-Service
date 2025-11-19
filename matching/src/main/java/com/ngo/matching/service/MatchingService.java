@@ -8,6 +8,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -62,58 +65,77 @@ public class MatchingService {
     }
 
     // ------------------------------------------
-    // LOCK POSTING (FULL WORKFLOW)
-    // ------------------------------------------
-
-    // Change method signature to accept Authorization header
     public String lockPosting(Long volunteerId, Long postingId, String authHeader) {
+
+        // 1. Validate posting exists locally (optional if your MS stores posting)
         PostingResponse posting = repo.findById(postingId)
                 .orElseThrow(() -> new RuntimeException("Posting not found"));
 
-        if (posting.getVolunteersNeeded() <= 0) {
-            throw new RuntimeException("No volunteer slots left!");
+        // --------------------------------------------
+        // STEP 1: CHECK IF VOLUNTEER ALREADY APPLIED
+        // --------------------------------------------
+
+        ResponseEntity<List> appliedPostingsResponse =
+                restTemplate.getForEntity(
+                        VOL_MS + "/api/v1/users/volunteers/" + volunteerId + "/postings",
+                        List.class
+                );
+
+        List<Long> alreadyAppliedPostings = appliedPostingsResponse.getBody();
+
+        if (alreadyAppliedPostings != null && alreadyAppliedPostings.contains(postingId)) {
+            throw new RuntimeException("Volunteer already registered for this posting");
         }
 
-        // Volunteer MS check
-        Boolean hasApplied = restTemplate.getForObject(
-                VOL_MS + "/hasApplied/" + volunteerId + "/" + postingId,
-                Boolean.class
-        );
-        if (Boolean.TRUE.equals(hasApplied)) {
-            throw new RuntimeException("Volunteer already applied for this posting");
-        }
-
-        // Save in Volunteer MS
-        String volApply = restTemplate.postForObject(
-                VOL_MS + "/apply/" + volunteerId + "/" + postingId,
-                null,
-                String.class
-        );
-        if (volApply == null || volApply.toLowerCase().contains("error")) {
-            throw new RuntimeException("Volunteer MS failed to save application");
-        }
-
-        // Save in Posting MS with Authorization header
+        // --------------------------------------------
+        // STEP 2: ASK POSTING MS TO REGISTER VOLUNTEER
+        // --------------------------------------------
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", authHeader);
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<String> postAssignResponse = restTemplate.exchange(
-                POST_MS + "/postings/" + postingId + "/register/" + volunteerId,
+        ResponseEntity<String> registerResponse = restTemplate.exchange(
+                POST_MS + "/api/v1/postings/" + postingId + "/register/" + volunteerId,
                 HttpMethod.POST,
                 entity,
                 String.class
         );
-        String postAssign = postAssignResponse.getBody();
-        if (postAssign == null || postAssign.toLowerCase().contains("error")) {
-            throw new RuntimeException("Posting MS failed to assign posting");
+
+        if (registerResponse.getBody() == null ||
+                registerResponse.getBody().toLowerCase().contains("error")) {
+            throw new RuntimeException("Posting MS failed: No slots or error while registering");
         }
 
-        // Reduce local slot
-        posting.setVolunteersNeeded(posting.getVolunteersNeeded() - 1);
-        repo.save(posting);
+        // --------------------------------------------
+        // STEP 3: SAVE MAPPING IN VOLUNTEER MS
+        // --------------------------------------------
+
+        ResponseEntity<String> mappingResponse = restTemplate.postForEntity(
+                VOL_MS + "/api/v1/users/volunteers/" + volunteerId + "/postings/" + postingId,
+                null,
+                String.class
+        );
+
+        if (mappingResponse.getBody() == null ||
+                mappingResponse.getBody().toLowerCase().contains("error")) {
+
+            // ROLLBACK: Undo slot reservation
+            restTemplate.exchange(
+                    POST_MS + "/api/v1/postings/" + postingId + "/unregister/" + volunteerId,
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+
+            throw new RuntimeException("Failed to save volunteer-posting mapping, rolled back");
+        }
+
+        // --------------------------------------------
+        // OPTIONAL: UPDATE LOCAL MATCHING MS STORAGE(must be done by posting -ms)
+        // --------------------------------------------
+//        posting.setVolunteersNeeded(posting.getVolunteersNeeded() - 1);
+//        repo.save(posting);
 
         return "Volunteer " + volunteerId + " successfully registered for posting " + postingId;
     }
-
 }

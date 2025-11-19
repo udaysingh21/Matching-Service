@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/matching")
+@RequestMapping("/api/v1/matching")
 @Tag(name = "Matching API")
 public class MatchingController {
 
