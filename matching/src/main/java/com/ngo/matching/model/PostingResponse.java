@@ -1,77 +1,37 @@
 package com.ngo.matching.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "postings")
+@Data
 public class PostingResponse {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long postingId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // comment later since id comes from posting service
+    private Long id;
 
-    private String ngoName;
-    private String location;
-    private LocalDate date;
-    private int slotsAvailable;
+    private String title;
+    private String description;
     private String domain;
 
-    public PostingResponse() {}
+    private String pincode;     // NEW
+    private String city;
+    private String state;
+    private String country;
 
-    public PostingResponse(String ngoName, String location, LocalDate date, int slotsAvailable, String domain) {
-        this.ngoName = ngoName;
-        this.location = location;
-        this.date = date;
-        this.slotsAvailable = slotsAvailable;
-        this.domain = domain;
-    }
+    private Integer volunteersNeeded;  // replaces slotsAvailable
 
-    public Long getPostingId() {
-        return postingId;
-    }
+    private LocalDate startDate;
+    private LocalDate endDate;
 
-    public void setPostingId(Long postingId) {
-        this.postingId = postingId;
-    }
+    private Long ngoId;
+    private String contactEmail;
+    private String contactPhone;
 
-    public String getNgoName() {
-        return ngoName;
-    }
+    private String status;
 
-    public void setNgoName(String ngoName) {
-        this.ngoName = ngoName;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public int getSlotsAvailable() {
-        return slotsAvailable;
-    }
-
-    public void setSlotsAvailable(int slotsAvailable) {
-        this.slotsAvailable = slotsAvailable;
-    }
-
-    public String getDomain() {
-        return domain;
-    }
-
-    public void setDomain(String domain) {
-        this.domain = domain;
-    }
+    private LocalDate createdAt;
+    private LocalDate updatedAt;
 }
