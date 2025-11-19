@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -65,6 +67,6 @@ public class MatchingService {
         posting.setSlotsAvailable(posting.getSlotsAvailable() - 1);
         repo.save(posting);
 
-        return "Volunteer " + volunteerId + " successfully locked posting " + postingId;
+        return "Volunteer " + volunteerId + " successfully registered for posting " + postingId;
     }
 }

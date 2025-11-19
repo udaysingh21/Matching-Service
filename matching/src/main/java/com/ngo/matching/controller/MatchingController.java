@@ -62,8 +62,10 @@ public class MatchingController {
     @PostMapping("/lock/{volunteerId}/{postingId}")
     public ResponseEntity<String> lock(
             @PathVariable Long volunteerId,
-            @PathVariable Long postingId) {
+            @PathVariable Long postingId,
+            @RequestHeader("Authorization") String authHeader) {
 
-        return ResponseEntity.ok(service.lockPosting(volunteerId, postingId));
+        return ResponseEntity.ok(service.lockPosting(volunteerId, postingId, authHeader));
     }
+
 }

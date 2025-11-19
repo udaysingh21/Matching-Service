@@ -1,15 +1,16 @@
 package com.ngo.matching.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "postings")
+@Data
 public class PostingResponse {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long postingId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // comment later since id comes from posting service
+    private Long id;
 
     private String ngoName;
     private String location;
@@ -27,17 +28,14 @@ public class PostingResponse {
         this.domain = domain;
     }
 
-    public Long getPostingId() {
-        return postingId;
-    }
+    private LocalDate startDate;
+    private LocalDate endDate;
 
-    public void setPostingId(Long postingId) {
-        this.postingId = postingId;
-    }
+    private Long ngoId;
+    private String contactEmail;
+    private String contactPhone;
 
-    public String getNgoName() {
-        return ngoName;
-    }
+    private String status;
 
     public void setNgoName(String ngoName) {
         this.ngoName = ngoName;
