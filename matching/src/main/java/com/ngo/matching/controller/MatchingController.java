@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/matching")
@@ -31,31 +32,34 @@ public class MatchingController {
     @Operation(summary = "Recommend postings with optional filters")
     @GetMapping("/recommend")
     public ResponseEntity<?> recommend(
-            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String pincode,
             @RequestParam(required = false) String domain,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate date
     ) {
-        // Check if all inputs are null/empty
-        if ((location == null || location.isBlank()) &&
+
+        // Validation: require at least 1 filter
+        if ((pincode == null || pincode.isBlank()) &&
                 (domain == null || domain.isBlank()) &&
                 date == null) {
             return ResponseEntity
                     .badRequest()
-                    .body("At least one filter (location/domain/date) is required.");
+                    .body("At least one filter (pincode/domain/date) is required.");
         }
 
-        List<PostingResponse> postings = service.recommendPostings(location, domain, date);
+        // Step 1: fetch all postings from posting-service
+        List<PostingResponse> allPostings = service.fetchAllPostingsFromPostingService();
 
-        if (postings == null || postings.isEmpty()) {
+        // Step 2: filter in matching service
+        List<PostingResponse> filtered = service.filterPostings(allPostings, pincode, domain, date);
+
+        if (filtered.isEmpty()) {
             return ResponseEntity.status(404).body("No postings found for given filters.");
         }
 
-        return ResponseEntity.ok(postings);
+        return ResponseEntity.ok(filtered);
     }
-
-
 
 
     @Operation(summary = "Lock posting for a volunteer")
