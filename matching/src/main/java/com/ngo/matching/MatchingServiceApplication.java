@@ -11,10 +11,4 @@ public class MatchingServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(MatchingServiceApplication.class, args);
     }
-
-    // ✅ RestTemplate Bean (Required for calling Volunteer MS & Posting MS)
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
 }

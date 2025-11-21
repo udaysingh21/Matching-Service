@@ -1,4 +1,4 @@
-package com.ngo.matching.config;
+package com.ngo.matching;
 
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Configuration;
