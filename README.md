@@ -90,17 +90,29 @@ The Matching Service does not maintain its own database of postings. Instead, it
  
 {
   "id": "Long",
+  
   "title": "String",
+  
   "description": "String",
+  
   "domain": "String",
+  
   "location": "String",
+  
   "pincode": "String",
+  
   "volunteersNeeded": "Integer",
+  
   "volunteersSpotLeft": "Integer",
+  
   "startDate": "LocalDate",
+  
   "endDate": "LocalDate",
+  
   "ngoId": "Long",
+  
   "volunteersRegistered": ["Long"]
+  
 }
 
 ## Getting Started
@@ -136,11 +148,14 @@ http://localhost:<port>/swagger-ui/index.html
 
 ### Configuration
 
-Application Properties
+Application Properties:
+
 server.port=8081
+
 spring.application.name=matching-service
 
 posting.service.url=http://localhost:8082/api/v1/postings
+
 volunteer.service.url=http://localhost:8083/api/v1/users/volunteers
 
 spring.cache.type=simple
