@@ -17,6 +17,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+@CrossOrigin(
+        origins = {"http://localhost:3000", "http://localhost:5173", "http://localhost:5174", "http://localhost:8080"},
+        allowCredentials = "true",
+        allowedHeaders = "*",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}
+)
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/matching")
