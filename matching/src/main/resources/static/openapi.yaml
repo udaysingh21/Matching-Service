@@ -5,7 +5,7 @@ info:
   description: API for recommending NGO postings to volunteers and locking match slots
 
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8081
 
 paths:
   /api/matching/recommend:
