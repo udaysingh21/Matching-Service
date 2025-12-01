@@ -1,4 +1,4 @@
-# Use Eclipse Temurin JRE for better Apple Silicon support
+# Use Eclipse Temurin JRE for better Apple Silicon support  
 FROM eclipse-temurin:17-jre
 
 # Set working directory
